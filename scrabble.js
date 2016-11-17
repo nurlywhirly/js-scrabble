@@ -47,42 +47,95 @@ var Scoring = {
     return score
   },
 
-  highestScoringWord: function(wordArray) {
-    var scoresWithWords = new Object();
+  highestScoreFrom: function(wordArray) {
+    var scoresWithWords = [],
+        tiedScoredWords = [],
+        wordScores = [],
+        maxScore = 0,
+        maxWord = "";
 
     for ( var i = 0; i < wordArray.length; i++ ) {
-      var word = wordArray[i],
-          score = this.score(word);
-
-      scoresWithWords[word] = score;
-    }
-
-    for ( var x = 0; x < wordArray.length; x++ ) {
-      var max = -Infinity;
-
-      if ( scoresWithWords[wordArray[x]] > max ) {
-        max = Object.keys(scoresWithWords)[x];
+      var score = Scoring.score(wordArray[i]);
+      if ( score > maxScore ) {
+        maxScore = score;
+        maxWord = wordArray[i];
       }
     }
 
-    return max
+    for ( var j = 0; j < wordArray.length; j++ ) {
+      var scoreTwice = Scoring.score(wordArray[j]);
+      if (scoreTwice == maxScore) {
+        tiedScoredWords.push(maxWord);
+        tiedScoredWords.push(wordArray[j]);
+      }
+    }
+
+    if (tiedScoredWords.length > 0) {
+      var shortest = tiedScoredWords.reduce(function (a, b) { return a.length < b.length ? a : b; });
+      return shortest;
+    }
+
+    return maxWord
   }
 };
 
+var Player = function(name) {
+  this.name = name;
+  this.plays = [];
+  this.totalScore = 0;
+}
+
+Player.prototype.hasWon = function() {
+  if ( this.totalScore >= 100 ) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+Player.prototype.play = function(word) {
+  if (this.hasWon() === false) {
+    var score = Scoring.score(word);
+    this.plays.push(word);
+    this.totalScore += score;
+  }
+}
+
+Player.prototype.highestScoringWord = function(allWordsPlayed) {
+  var highestWord = Scoring.highestScoreFrom(allWordsPlayed);
+  return highestWord;
+}
+
+Player.prototype.highestWordScore = function(allWordsPlayed) {
+  var highestWord = Scoring.highestScoreFrom(allWordsPlayed);
+  highestScore = Scoring.score(highestWord);
+  return highestScore;
+}
 
 
+///////// TESTING ////////////
 
-// YOUR CODE HERE
-Scrabble.prototype.helloWorld = function() {
-  return 'hello world!';
-};
-
-// var myGame = new Scrabble("BOX")   ??!?!?!??!
-
+// Check score
 // console.log(Scoring.score("box"))
 
-console.log(Scoring.highestScoringWord(["a","b","x"]))
+// Check highestScoringWord
+// console.log(Scoring.highestScoringWord(["aa","bb","x","ss","dddd"]))
 
+// Create a player
+var janey = new Player("Janey");
+
+// Play some words
+janey.play("zzz")
+janey.play("uyu")
+janey.play("abc")
+
+// Test instance properties
+console.log("plays array: " + janey.plays)
+console.log("total score: " + janey.totalScore)
+
+// Test instance functions
+console.log("highestScoringWord: " + janey.highestScoringWord(janey.plays))
+console.log("highestWordScore: " + janey.highestWordScore(janey.plays))
 
 
 
